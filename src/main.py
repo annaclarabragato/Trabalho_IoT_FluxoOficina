@@ -49,7 +49,35 @@ def listar ():
 
  #patch
 
+@app.patch("/registros/{placa}/finalizar")
+async def finalizar(placa: str, request: Request):
+    #recupera o body
+    body = await request.body()
+    #converte para dictionary
+    body = dict(json.loads(body))
 
+    #criando uma variável de controle
+    registro_existe = None
+
+    for registro in registros:
+        if (registro.get("placa_veiculo") == placa):
+            registro_existe = registro
+            break
+
+    if (not registro_existe):
+        content = json.dumps({"mensagem": "Registro não existe"})
+        return Response(content=content,
+                        status_code=404,
+                        media_type="application/json")
+
+    #obtenho o horario
+    peso_final = body.get("horario_final", 0)
+
+    indice = registros.index(registro_existe)
+
+    registros[indice]["data_hora_saida"] = datetime.now()
+
+    return registros[indice]
 
 
 #Deletando registros:
