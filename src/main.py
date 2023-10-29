@@ -38,3 +38,48 @@ async def criar_registro(request: Request):
 
     registros.append(body)
     return body
+
+
+   #GET apresentando todos os registros
+
+@app.get("/registros")
+def listar ():
+    return{"registros":registros}
+
+
+ #patch
+
+
+
+
+#Deletando registros:
+@app.delete("/registros/{placa}/excluir")
+def excluir_registro(placa: str):
+    registro_encontrado = None
+
+    for registro in registros:
+        if registro.get("placa_veiculo") == placa:
+            registro_encontrado = registro
+            break
+
+    if not registro_encontrado:
+        raise HTTPException(status_code=404, detail="Registro não encontrado")
+
+    if "data_hora_saida" in registro_encontrado:
+        raise HTTPException(status_code=400, detail="Registro já foi finalizado e não pode ser excluído")
+
+    registros.remove(registro_encontrado)
+
+    return {"mensagem": "Registro excluído com sucesso"}
+
+
+
+# GET - apresentando todos os registros de veiculos que estão ainda em manutenção e não foram finalizados: 
+@app.get("/registros/nao_finalizados")
+def listar_nao_finalizados():
+    registros_nao_finalizados = []
+    for registro in registros:
+        if registro.get("data_hora_saida") is None:
+            registros_nao_finalizados.append(registro)
+
+    return {"registros_nao_finalizados": registros_nao_finalizados}
